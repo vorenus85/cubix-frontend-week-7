@@ -1,4 +1,4 @@
-export const useService = () => {
+export const postService = () => {
   const createPostService = async ({ title, body }) => {
     const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
       method: "POST",
@@ -38,9 +38,25 @@ export const useService = () => {
     return await response.json();
   };
 
+  const deletePostService = async (id) => {
+    const response = await fetch(
+      `https://jsonplaceholder.typicode.com/posts/${id}`,
+      {
+        method: "DELETE",
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Delete failed");
+    }
+
+    return true;
+  };
+
   return {
     createPostService,
     updatePostService,
     listPostsService,
+    deletePostService,
   };
 };

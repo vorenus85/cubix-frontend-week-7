@@ -1,55 +1,38 @@
 import { UIelement } from "./modules/ui.js";
-import { useRender } from "./modules/render.js";
-import { useService } from "./modules/service.js";
+import { render } from "./modules/render.js";
+import { postService } from "./modules/service.js";
+import { events } from "./modules/events.js";
 
 export const myApp = () => {
-  const {
-    postListEl,
-    formEl,
-    newFormPostIdEl,
-    newFormPostTitleEl,
-    newFormPostDescriptionEl,
-  } = UIelement;
+  const { postListEl, postsListWithDetailsEl } = UIelement;
 
-  const { createPostService, updatePostService, listPostsService } =
-    useService();
-  const { renderNewPost, renderPostList } = useRender();
-
-  // to events
-  const submit = () => {
-    formEl.addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      const postId = newFormPostIdEl.value;
-      const postTitle = newFormPostTitleEl.value;
-      const postBody = newFormPostDescriptionEl.value;
-
-      if (postId) {
-        const { id, title, body } = await updatePostService({
-          id: postId,
-          title: postTitle,
-          body: postBody,
-        });
-
-        renderNewPost({ id, title, body });
-      } else {
-        const { id, title, body } = await createPostService({
-          title: postTitle,
-          body: postBody,
-        });
-        renderNewPost({ id, title, body });
-      }
-    });
-  };
+  const { listPostsService } = postService();
+  const { renderPostList } = render();
+  const { submit, deletePost } = events();
 
   const doRenderPostList = async () => {
     const list = await listPostsService();
-    await renderPostList(list, postListEl);
+    renderPostList(
+      list.slice(0, 10),
+      { showTitle: true, showDelete: true },
+      postListEl,
+    );
+  };
+
+  const doRenderPostWithDetailsList = async () => {
+    const list = await listPostsService();
+    renderPostList(
+      list.slice(0, 5),
+      { showTitle: true, showDescription: true, showId: true },
+      postsListWithDetailsEl,
+    );
   };
 
   const init = () => {
     submit();
+    deletePost();
     doRenderPostList();
+    doRenderPostWithDetailsList();
   };
 
   return {
